@@ -15,6 +15,13 @@ import android.widget.ImageButton;
 import android.widget.ListView;
 import android.widget.TableLayout;
 import android.widget.TableRow;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -22,6 +29,7 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     final ArrayList<Roster> rosters = new ArrayList<Roster>();
     ArrayAdapter adapter;
+    final String tempFilename = "rosterTmp.srl";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +49,8 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
-                final String item = (String) parent.getItemAtPosition(position);
+                final Roster roster = rosters.get(position);
+                System.out.println("Clicked on "+roster.toString());
 
             }
         });
@@ -52,7 +61,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent myIntent = new Intent(MainActivity.this, ChooseImportMethod.class);
                 //myIntent.putExtra("key", value); //Optional parameters
-                MainActivity.this.startActivity(myIntent);
+                startActivity(myIntent);
             }
         });
     }
@@ -61,10 +70,32 @@ public class MainActivity extends AppCompatActivity {
     protected void onRestart() {
 // TODO Auto-generated method stub
         super.onRestart();
-        Roster r = new Roster("New Row " + rosters.size());
+    }
 
-        rosters.add(r);
-        adapter.notifyDataSetChanged();
+    @Override
+    protected void onNewIntent(Intent intent) {
+        if (intent.getAction() == Intent.ACTION_SEND) {
+            boolean rosterIncoming = intent.getBooleanExtra("rosterIncoming",false); // defaults to false
+            if (rosterIncoming) {
+                // read roster from temp file
+                try {
+                    FileInputStream fis = new FileInputStream(new File(getCacheDir(), tempFilename));
+                    ObjectInputStream ois = new ObjectInputStream(fis);
+                    try {
+                        Roster r = (Roster) ois.readObject();
+                        rosters.add(r);
+                        adapter.notifyDataSetChanged();
+                    } catch (ClassNotFoundException e) {
+                        e.printStackTrace();
+                    }
+                    ois.close();
+                    fis.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     @Override
@@ -91,6 +122,12 @@ public class MainActivity extends AppCompatActivity {
         }
 
         return true;
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+
     }
 }
 

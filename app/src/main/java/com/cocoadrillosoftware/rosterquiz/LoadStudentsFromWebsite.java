@@ -5,6 +5,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.support.v7.app.AppCompatActivity;
@@ -13,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -20,8 +25,11 @@ import android.widget.TextView;
 
 import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectOutputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -39,7 +47,8 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
     ArrayAdapter adapter;
 
     Roster roster;
-    int imageCount, loadingErrors;
+    int loadingErrors;
+    final String tempFilename = "rosterTmp.srl";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,46 +74,30 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
 
         adapter = new RosterAdapter(this, roster);
         studentsTable.setAdapter(adapter);
-    }
-
-    public class RosterAdapter extends ArrayAdapter<Student> {
-
-        public RosterAdapter(Activity activity, List<Student> imageAndTexts) {
-            super(activity, 0, imageAndTexts);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            Activity activity = (Activity) getContext();
-            LayoutInflater inflater = activity.getLayoutInflater();
-
-            // Inflate the views from XML
-            View rowView = inflater.inflate(R.layout.image_and_text, null);
-            Student student = getItem(position);
-
-            // Load the image and set it on the ImageView
-            if (student.picture != null) {
-                ImageView imageView = (ImageView) rowView.findViewById(R.id.studentImage);
-                imageView.setImageDrawable(student.picture);
-                //imageView.setImageDrawable(loadImageFromUrl(imageAndText.getImageUrl()));
+        final Button button = (Button) findViewById(R.id.addToRosterButton);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                // save the data to our temporary file
+                try {
+                    File outputDir = getCacheDir(); // context being the Activity pointer
+                    File outputFile = new File(getCacheDir(), tempFilename);
+                    FileOutputStream fos = new FileOutputStream(outputFile);
+                    ObjectOutputStream oos = new ObjectOutputStream(fos);
+                    oos.writeObject(roster);
+                    oos.close();
+                    fos.close();
+                }
+                catch(IOException e) {
+                    e.printStackTrace();
+                }
+                // send
+                Intent intent = new Intent(LoadStudentsFromWebsite.this, MainActivity.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+                intent.putExtra("rosterIncoming", true); //Optional parameters
+                LoadStudentsFromWebsite.this.startActivity(intent);
             }
-
-            // Set the text on the TextView
-            TextView textView = (TextView) rowView.findViewById(R.id.studentText);
-            textView.setText(student.commaName());
-
-            return rowView;
-        }
-
-        public Drawable loadImageFromUrl(String url) {
-            InputStream inputStream;
-            try {
-                inputStream = new URL(url).openStream();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-            return Drawable.createFromStream(inputStream, "src");
-        }
+        });
     }
 
     public class LoadStudentNames extends AsyncTask<String, String, String> {
@@ -169,7 +162,6 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
             }
             adapter.notifyDataSetChanged();
             // now actually load the images
-            imageCount = 0;
             loadingErrors = 0;
             if (roster.size() > 0) {
                 populateImages(0);
@@ -181,12 +173,11 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
 
         String bodyData = "https://www.eecs.tufts.edu/~cgregg/rosters/cgi-bin/retrieveImageByFolder.cgi";
 
-        bodyData += "?name="+username+"&imgFolder="+imgFolder+"&imgName="+images.get(count);
+        bodyData += "?name="+username+"&imgFolder="+imgFolder+"&imgName="+images.get(count).replace(" ","%20");
         popImages.execute(bodyData);
         // wait 125ms before loading the next one.
-        /*
+        count += 1;
         if (count < images.size()) {
-            count += 1;
             final int thisCount = count;
             new java.util.Timer().schedule(
                     new java.util.TimerTask() {
@@ -197,10 +188,10 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
                     },
                     125 // ms
             );
-        }*/
+        }
     }
 
-    public class PopulateImages extends AsyncTask<String, String, String> {
+    public class PopulateImages extends AsyncTask<String, String, SerialBitmap> {
         int count;
 
         public PopulateImages(int count) {
@@ -212,9 +203,8 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
             super.onPreExecute();
         }
 
-
         @Override
-        protected String doInBackground(String... params) {
+        protected SerialBitmap doInBackground(String... params) {
 
             String urlString = params[0]; // URL to call
 
@@ -233,26 +223,26 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
                 String s = e.getMessage();
                 System.out.println(e.getMessage());
 
-                return e.getMessage();
+                //return e.getMessage();
+                return null;
 
             }
 
-            resultToDisplay = new Scanner(in).useDelimiter("\\A").next();
+            //resultToDisplay = new Scanner(in).useDelimiter("\\A").next();
+            SerialBitmap b = new SerialBitmap(in);
 
-            return resultToDisplay;
+            return b;
+            //return resultToDisplay;
         }
 
 
         @Override
-        protected void onPostExecute(String result) {
+        protected void onPostExecute(SerialBitmap result) {
             //we should have the image data in our string
             if (result != null) {
-                    InputStream is = new ByteArrayInputStream(result.getBytes());
-                    Drawable d = Drawable.createFromStream(is,"pic");
-                    roster.get(count).picture = d;
-                    adapter.notifyDataSetChanged();
+                roster.get(count).picture = result;
+                adapter.notifyDataSetChanged();
             }
-
         }
     }
 }

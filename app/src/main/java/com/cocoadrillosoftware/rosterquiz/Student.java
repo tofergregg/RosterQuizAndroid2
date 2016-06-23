@@ -1,16 +1,17 @@
 package com.cocoadrillosoftware.rosterquiz;
 
-import android.graphics.drawable.Drawable;
+import android.graphics.Bitmap;
+import java.io.Serializable;
 
 /**
  * Created by chrisgregg on 6/21/16.
  */
-public class Student {
+public class Student implements Serializable {
     String firstName;
     String lastName;
     String year;
     String notes;
-    Drawable picture;
+    SerialBitmap picture;
 
     Student() {
 
@@ -21,7 +22,7 @@ public class Student {
         firstName = first;
     }
 
-    void addDetails(String last, String first, String yr, String nts, Drawable pic){
+    void addDetails(String last, String first, String yr, String nts, SerialBitmap pic){
         firstName = first;
         lastName = last;
         year = yr;

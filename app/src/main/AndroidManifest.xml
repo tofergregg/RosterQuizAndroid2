@@ -20,8 +20,9 @@
         <activity android:name=".ChooseImportMethod" />
         <activity
             android:name=".LoadRosterFromWebsite"
-            android:windowSoftInputMode="adjustPan"></activity>
-        <activity android:name=".LoadStudentsFromWebsite"></activity>
+            android:windowSoftInputMode="adjustPan" />
+        <activity android:name=".LoadStudentsFromWebsite" />
+        <activity android:name=".ShowRoster"></activity>
     </application>
 
 </manifest>

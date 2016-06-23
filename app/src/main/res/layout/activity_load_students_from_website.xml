@@ -39,7 +39,8 @@
         android:layout_centerHorizontal="true"
         android:layout_below="@+id/studentLabel"
         android:layout_above="@+id/addToRosterButton"
-        android:choiceMode="none">
+        android:choiceMode="none"
+        android:listSelector="@android:color/transparent">
     </ListView>
 
 </RelativeLayout>
