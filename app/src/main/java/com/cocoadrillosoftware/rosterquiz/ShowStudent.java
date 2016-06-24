@@ -4,13 +4,14 @@ import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.TextView;
 
 public class ShowStudent extends AppCompatActivity {
 
     Student student;
-    TextView notesText, lastText, firstText, yearText;
+    EditText notesText, lastText, firstText, yearText;
     ImageButton picture;
 
     @Override
@@ -22,10 +23,10 @@ public class ShowStudent extends AppCompatActivity {
         Intent intent = getIntent();
         student = (Student) intent.getSerializableExtra("student");
 
-        notesText = (TextView) findViewById(R.id.nameText);
-        lastText = (TextView) findViewById(R.id.lastText);
-        firstText = (TextView) findViewById(R.id.firstText);
-        yearText = (TextView) findViewById(R.id.yearText);
+        notesText = (EditText) findViewById(R.id.notesText);
+        lastText = (EditText) findViewById(R.id.lastText);
+        firstText = (EditText) findViewById(R.id.firstText);
+        yearText = (EditText) findViewById(R.id.yearText);
         picture = (ImageButton) findViewById(R.id.studentImage);
 
         if (student.notes != null)
