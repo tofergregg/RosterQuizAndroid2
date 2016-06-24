@@ -2,10 +2,8 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$USER_HOME$/GoogleDrive/Programming/Android/RosterQuizMacbook/RosterQuizAndroid/RosterQuizAndroid.iml" filepath="$USER_HOME$/GoogleDrive/Programming/Android/RosterQuizMacbook/RosterQuizAndroid/RosterQuizAndroid.iml" />
-      <module fileurl="file://$USER_HOME$/Google_Drive/Programming/Android/RosterQuizAndroid2/RosterQuizAndroid2.iml" filepath="$USER_HOME$/Google_Drive/Programming/Android/RosterQuizAndroid2/RosterQuizAndroid2.iml" />
-      <module fileurl="file://$USER_HOME$/Google_Drive/Programming/Android/RosterQuizAndroid2/app/app.iml" filepath="$USER_HOME$/Google_Drive/Programming/Android/RosterQuizAndroid2/app/app.iml" />
-      <module fileurl="file://$USER_HOME$/GoogleDrive/Programming/Android/RosterQuizMacbook/RosterQuizAndroid/app/app.iml" filepath="$USER_HOME$/GoogleDrive/Programming/Android/RosterQuizMacbook/RosterQuizAndroid/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/RosterQuizAndroid.iml" filepath="$PROJECT_DIR$/RosterQuizAndroid.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
     </modules>
   </component>
 </project>
