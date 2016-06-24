@@ -18,6 +18,7 @@ import android.widget.TableRow;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -27,9 +28,9 @@ import java.util.HashMap;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    final ArrayList<Roster> rosters = new ArrayList<Roster>();
+    ArrayList<Roster> rosters = new ArrayList<Roster>();
     ArrayAdapter adapter;
-    final String tempFilename = "rosterTmp.srl";
+    final String rostersFolderName = "Rosters";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,13 @@ public class MainActivity extends AppCompatActivity {
                                     int position, long id) {
                 final Roster roster = rosters.get(position);
                 System.out.println("Clicked on "+roster.toString());
+                // save the roster to transfer it
+
+                // send
+                Intent intent = new Intent(MainActivity.this, ShowRoster.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra("rosterFilename", roster.toString()); //Optional parameters
+                startActivity(intent);
 
             }
         });
@@ -64,6 +72,28 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(myIntent);
             }
         });
+
+        // read in rosters if they have been saved
+        File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
+        if (!rostersFolder.exists())
+            rostersFolder.mkdirs();
+        // get a list of rosters from the directory
+        File files[] = rostersFolder.listFiles();
+        // read in each file
+        for (File f : files) {
+            try {
+                FileInputStream fis = new FileInputStream(f);
+                ObjectInputStream ois = new ObjectInputStream(fis);
+                try {
+                    rosters.add((Roster) ois.readObject());
+                } catch (ClassNotFoundException e) {
+                    e.printStackTrace();
+                }
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
+        }
+        adapter.notifyDataSetChanged();
     }
 
     @Override
@@ -75,11 +105,13 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onNewIntent(Intent intent) {
         if (intent.getAction() == Intent.ACTION_SEND) {
-            boolean rosterIncoming = intent.getBooleanExtra("rosterIncoming",false); // defaults to false
-            if (rosterIncoming) {
+            String rosterIncoming = intent.getStringExtra("rosterIncoming"); // defaults to ""
+            if (rosterIncoming != "") {
                 // read roster from temp file
                 try {
-                    FileInputStream fis = new FileInputStream(new File(getCacheDir(), tempFilename));
+                    File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
+                    File tempFile = new File(rostersFolder,rosterIncoming);
+                    FileInputStream fis = new FileInputStream(tempFile);
                     ObjectInputStream ois = new ObjectInputStream(fis);
                     try {
                         Roster r = (Roster) ois.readObject();

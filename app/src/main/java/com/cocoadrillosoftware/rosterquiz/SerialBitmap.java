@@ -14,7 +14,7 @@ import java.io.Serializable;
 public class SerialBitmap implements Serializable {
 
     private Bitmap bitmap;
-    
+
     SerialBitmap(InputStream in) {
         // Take your existing call to BitmapFactory and put it here
         bitmap = BitmapFactory.decodeStream(in);

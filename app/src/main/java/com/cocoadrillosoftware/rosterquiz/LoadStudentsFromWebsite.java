@@ -2,6 +2,7 @@ package com.cocoadrillosoftware.rosterquiz;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Application;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -44,11 +45,11 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
     String username, imgFolder, rosterName;
     ArrayList<String> images;
 
-    ArrayAdapter adapter;
+    RosterAdapter adapter;
 
     Roster roster;
     int loadingErrors;
-    final String tempFilename = "rosterTmp.srl";
+    final String rostersFolderName = "Rosters";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,8 +80,8 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
             public void onClick(View v) {
                 // save the data to our temporary file
                 try {
-                    File outputDir = getCacheDir(); // context being the Activity pointer
-                    File outputFile = new File(getCacheDir(), tempFilename);
+                    File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
+                    File outputFile = new File(rostersFolder,roster.toString());
                     FileOutputStream fos = new FileOutputStream(outputFile);
                     ObjectOutputStream oos = new ObjectOutputStream(fos);
                     oos.writeObject(roster);
@@ -94,7 +95,7 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
                 Intent intent = new Intent(LoadStudentsFromWebsite.this, MainActivity.class);
                 intent.setAction(Intent.ACTION_SEND);
                 intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
-                intent.putExtra("rosterIncoming", true); //Optional parameters
+                intent.putExtra("rosterIncoming", roster.toString()); //Optional parameters
                 LoadStudentsFromWebsite.this.startActivity(intent);
             }
         });

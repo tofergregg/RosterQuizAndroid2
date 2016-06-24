@@ -1,3 +1,4 @@
 <resources>
     <string name="app_name">RosterQuiz</string>
+    <string name="title_activity_show_student">ShowStudent</string>
 </resources>

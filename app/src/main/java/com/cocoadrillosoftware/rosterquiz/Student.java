@@ -7,10 +7,10 @@ import java.io.Serializable;
  * Created by chrisgregg on 6/21/16.
  */
 public class Student implements Serializable {
-    String firstName;
-    String lastName;
-    String year;
-    String notes;
+    String firstName = "";
+    String lastName = "";
+    String year = "";
+    String notes = "";
     SerialBitmap picture;
 
     Student() {

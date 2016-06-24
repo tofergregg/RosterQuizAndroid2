@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.cocoadrillosoftware.rosterquiz.ShowStudent">
+
+    <ImageButton
+        android:layout_width="200dp"
+        android:layout_height="200dp"
+        android:scaleType="fitCenter"
+        android:layout_centerHorizontal="true"
+        android:id="@+id/studentImage"
+        android:layout_alignParentTop="true"
+        android:src="@drawable/user_400"
+        android:maxWidth="10dp"
+        android:maxHeight="10dp" />
+
+    <EditText
+        android:layout_width="400dp"
+        android:layout_height="150dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Put notes here."
+        android:id="@+id/notesText"
+        android:layout_below="@+id/studentImage"
+        android:layout_toEndOf="@+id/notesLabel"
+        android:layout_alignLeft="@+id/studentImage"
+        android:layout_alignStart="@+id/studentImage"
+        android:editable="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Notes:"
+        android:id="@+id/notesLabel"
+        android:layout_below="@+id/studentImage"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Last:"
+        android:id="@+id/lastLabel"
+        android:layout_below="@+id/notesText"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="First:"
+        android:id="@+id/firstLabel"
+        android:layout_marginTop="26dp"
+        android:layout_below="@+id/lastLabel"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="Year:"
+        android:id="@+id/yearLabel"
+        android:layout_marginTop="23dp"
+        android:layout_below="@+id/firstLabel"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true" />
+
+    <EditText
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="last name"
+        android:id="@+id/lastText"
+        android:layout_alignTop="@+id/lastLabel"
+        android:layout_alignLeft="@+id/notesText"
+        android:layout_alignStart="@+id/notesText"
+        android:layout_above="@+id/firstLabel"
+        android:layout_alignRight="@+id/notesText"
+        android:layout_alignEnd="@+id/notesText"
+        android:editable="true" />
+
+    <EditText
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="first name"
+        android:id="@+id/firstText"
+        android:layout_above="@+id/yearLabel"
+        android:layout_alignLeft="@+id/lastText"
+        android:layout_alignStart="@+id/lastText"
+        android:layout_alignTop="@+id/firstLabel"
+        android:layout_alignRight="@+id/lastText"
+        android:layout_alignEnd="@+id/lastText"
+        android:editable="true" />
+
+    <EditText
+        android:layout_width="100dp"
+        android:layout_height="150dp"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        android:text="year"
+        android:id="@+id/yearText"
+        android:layout_alignTop="@+id/yearLabel"
+        android:layout_alignLeft="@+id/firstText"
+        android:layout_alignStart="@+id/firstText"
+        android:layout_alignRight="@+id/firstText"
+        android:layout_alignEnd="@+id/firstText"
+        android:layout_alignBottom="@+id/yearLabel"
+        android:editable="true" />
+</RelativeLayout>
