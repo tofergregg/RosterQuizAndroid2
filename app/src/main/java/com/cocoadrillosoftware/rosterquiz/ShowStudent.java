@@ -6,6 +6,8 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -45,6 +47,8 @@ public class ShowStudent extends AppCompatActivity {
             picture.setImageDrawable(new BitmapDrawable(getResources(),student.picture.getBitmap()));
         }
 
+        this.setTitle(student.commaName());
+
         // set up new roster button
         final Button saveButton = (Button) findViewById(R.id.saveButton);
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -65,6 +69,24 @@ public class ShowStudent extends AppCompatActivity {
                 startActivity(intent);
             }
         });
+
+        TextWatcher watcher= new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                student.lastName = lastText.getText().toString();
+                student.firstName = firstText.getText().toString();
+                setTitle(student.commaName());
+
+            }
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                //Do something or nothing.
+            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                //Do something or nothing
+            }
+        };
+
+        lastText.addTextChangedListener(watcher);
+        firstText.addTextChangedListener(watcher);
     }
     @Override
     protected void onPause()
