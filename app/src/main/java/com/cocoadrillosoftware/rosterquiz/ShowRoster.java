@@ -1,5 +1,6 @@
 package com.cocoadrillosoftware.rosterquiz;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.app.AppCompatActivity;
@@ -17,6 +18,8 @@ public class ShowRoster extends AppCompatActivity {
     Roster roster;
     RosterAdapter adapter;
     final String rostersFolderName = "Rosters";
+    int currentPosition;
+    boolean rosterChanged = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +54,7 @@ public class ShowRoster extends AppCompatActivity {
             @Override
             public void onItemClick(AdapterView<?> parent, final View view,
                                     int position, long id) {
+                currentPosition = position;
                 final Student student = roster.get(position);
                 System.out.println("Clicked on "+student.toString());
                 // save the roster to transfer it
@@ -64,4 +68,24 @@ public class ShowRoster extends AppCompatActivity {
             }
         });
     }
+
+    @Override
+    public void onBackPressed() {
+        if (rosterChanged) {
+            Roster.save(getApplicationContext(),roster);
+        }
+        super.onBackPressed();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        String sender = intent.getStringExtra("sender");
+        if (sender != null && sender.equals("ShowStudent")) {
+            System.out.println("Back from Students with student to save.");
+            Student s = (Student) intent.getSerializableExtra("student");
+            roster.set(currentPosition,s);
+            rosterChanged = true;
+        }
+    }
+
 }

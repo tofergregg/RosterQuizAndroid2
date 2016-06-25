@@ -1,6 +1,8 @@
 package com.cocoadrillosoftware.rosterquiz;
 
 import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
+
 import java.io.Serializable;
 
 /**
@@ -46,4 +48,7 @@ public class Student implements Serializable {
         return lastName;
     }
 
+    void setPictureFromDrawable(Drawable d) {
+        picture = new SerialBitmap(d);
+    }
 }

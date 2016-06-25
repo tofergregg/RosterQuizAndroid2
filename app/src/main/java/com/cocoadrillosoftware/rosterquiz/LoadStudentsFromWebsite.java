@@ -44,12 +44,12 @@ import javax.net.ssl.HttpsURLConnection;
 public class LoadStudentsFromWebsite extends AppCompatActivity {
     String username, imgFolder, rosterName;
     ArrayList<String> images;
+    ImageView centerImage;
 
     RosterAdapter adapter;
 
     Roster roster;
     int loadingErrors;
-    final String rostersFolderName = "Rosters";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,6 +57,7 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
 
         setContentView(R.layout.activity_load_students_from_website);
         final ListView studentsTable = (ListView) findViewById(R.id.studentsListView);
+        centerImage = (ImageView) findViewById(R.id.centerImage);
 
         // set the incoming data
         Intent intent = getIntent();
@@ -79,18 +80,8 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 // save the data to our temporary file
-                try {
-                    File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
-                    File outputFile = new File(rostersFolder,roster.toString());
-                    FileOutputStream fos = new FileOutputStream(outputFile);
-                    ObjectOutputStream oos = new ObjectOutputStream(fos);
-                    oos.writeObject(roster);
-                    oos.close();
-                    fos.close();
-                }
-                catch(IOException e) {
-                    e.printStackTrace();
-                }
+                Roster.save(getApplicationContext(),roster);
+
                 // send
                 Intent intent = new Intent(LoadStudentsFromWebsite.this, MainActivity.class);
                 intent.setAction(Intent.ACTION_SEND);
@@ -166,6 +157,7 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
             loadingErrors = 0;
             if (roster.size() > 0) {
                 populateImages(0);
+                centerImage.setVisibility(View.VISIBLE);
             }
         }
     }
@@ -175,8 +167,9 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
         String bodyData = "https://www.eecs.tufts.edu/~cgregg/rosters/cgi-bin/retrieveImageByFolder.cgi";
 
         bodyData += "?name="+username+"&imgFolder="+imgFolder+"&imgName="+images.get(count).replace(" ","%20");
+
         popImages.execute(bodyData);
-        // wait 125ms before loading the next one.
+        // wait 75ms before loading the next one.
         count += 1;
         if (count < images.size()) {
             final int thisCount = count;
@@ -187,7 +180,7 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
                             populateImages(thisCount);
                         }
                     },
-                    125 // ms
+                    75 // ms
             );
         }
     }
@@ -241,8 +234,14 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
         protected void onPostExecute(SerialBitmap result) {
             //we should have the image data in our string
             if (result != null) {
+                centerImage.setImageDrawable(new BitmapDrawable(getResources(), result.getBitmap()));
                 roster.get(count).picture = result;
                 adapter.notifyDataSetChanged();
+                if (count == images.size()-1) {
+                    centerImage.setVisibility(View.INVISIBLE);
+                    final Button saveButton = (Button) findViewById(R.id.addToRosterButton);
+                    saveButton.setEnabled(true);
+                }
             }
         }
     }

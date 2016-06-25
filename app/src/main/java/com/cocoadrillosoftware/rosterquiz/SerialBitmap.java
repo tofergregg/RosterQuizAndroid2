@@ -2,6 +2,8 @@ package com.cocoadrillosoftware.rosterquiz;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -18,6 +20,11 @@ public class SerialBitmap implements Serializable {
     SerialBitmap(InputStream in) {
         // Take your existing call to BitmapFactory and put it here
         bitmap = BitmapFactory.decodeStream(in);
+    }
+
+    SerialBitmap(Drawable d) {
+        BitmapDrawable bitmapDrawable = (BitmapDrawable) d;
+        bitmap = bitmapDrawable.getBitmap();
     }
 
     public Bitmap getBitmap() { return bitmap; }

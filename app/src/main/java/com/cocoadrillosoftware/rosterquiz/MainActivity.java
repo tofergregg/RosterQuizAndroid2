@@ -81,16 +81,9 @@ public class MainActivity extends AppCompatActivity {
         File files[] = rostersFolder.listFiles();
         // read in each file
         for (File f : files) {
-            try {
-                FileInputStream fis = new FileInputStream(f);
-                ObjectInputStream ois = new ObjectInputStream(fis);
-                try {
-                    rosters.add((Roster) ois.readObject());
-                } catch (ClassNotFoundException e) {
-                    e.printStackTrace();
-                }
-            } catch(IOException e) {
-                e.printStackTrace();
+            Roster r = Roster.load(getApplicationContext(),f.getName());
+            if (r != null) {
+                rosters.add(r);
             }
         }
         adapter.notifyDataSetChanged();
@@ -108,23 +101,10 @@ public class MainActivity extends AppCompatActivity {
             String rosterIncoming = intent.getStringExtra("rosterIncoming"); // defaults to ""
             if (rosterIncoming != "") {
                 // read roster from temp file
-                try {
-                    File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
-                    File tempFile = new File(rostersFolder,rosterIncoming);
-                    FileInputStream fis = new FileInputStream(tempFile);
-                    ObjectInputStream ois = new ObjectInputStream(fis);
-                    try {
-                        Roster r = (Roster) ois.readObject();
-                        rosters.add(r);
-                        adapter.notifyDataSetChanged();
-                    } catch (ClassNotFoundException e) {
-                        e.printStackTrace();
-                    }
-                    ois.close();
-                    fis.close();
-                }
-                catch(IOException e) {
-                    e.printStackTrace();
+                Roster r = Roster.load(getApplicationContext(),rosterIncoming);
+                if (r != null) {
+                    rosters.add(r);
+                    adapter.notifyDataSetChanged();
                 }
             }
         }
@@ -148,7 +128,10 @@ public class MainActivity extends AppCompatActivity {
         AdapterView.AdapterContextMenuInfo info = (AdapterView.AdapterContextMenuInfo)item.getMenuInfo();
         int menuItemIndex = item.getItemId();
         if (menuItemIndex == 0) { // clicked "Delete"
-            // get name from title
+            // delete from storage
+            Roster.deleteFromStorage(getApplicationContext(),rosters.get(info.position).toString());
+
+            // remove from rosters
             rosters.remove(info.position);
             adapter.notifyDataSetChanged();
         }
