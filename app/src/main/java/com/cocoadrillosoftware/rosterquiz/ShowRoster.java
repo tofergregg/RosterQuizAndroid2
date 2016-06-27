@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.AdapterView;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import java.io.File;
@@ -30,25 +31,11 @@ public class ShowRoster extends AppCompatActivity {
         Intent i = getIntent();
         String rosterFilename = i.getStringExtra("rosterFilename");
         // read roster from temp file
-        try {
-            File rostersFolder = getDir(rostersFolderName, Context.MODE_PRIVATE);
-            File tempFile = new File(rostersFolder,rosterFilename);
-            FileInputStream fis = new FileInputStream(tempFile);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-            try {
-                roster = (Roster) ois.readObject();
-                adapter = new RosterAdapter(this, roster);
-                studentsTable.setAdapter(adapter);
-                adapter.notifyDataSetChanged();
-            } catch (ClassNotFoundException e) {
-                e.printStackTrace();
-            }
-            ois.close();
-            fis.close();
-        }
-        catch(IOException e) {
-            e.printStackTrace();
-        }
+        roster = Roster.load(getApplicationContext(),rosterFilename);
+        adapter = new RosterAdapter(this, roster);
+        studentsTable.setAdapter(adapter);
+        adapter.notifyDataSetChanged();
+
         studentsTable.setOnItemClickListener(new AdapterView.OnItemClickListener() {
 
             @Override
@@ -67,6 +54,20 @@ public class ShowRoster extends AppCompatActivity {
 
             }
         });
+
+        final ImageButton newStudentButton = (ImageButton) findViewById(R.id.newStudent);
+        newStudentButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Student blank_student = new Student();
+                blank_student.lastName = "Last Name";
+                blank_student.firstName = "First Name";
+                currentPosition = -1; // will have to append when we return
+                Intent intent = new Intent(ShowRoster.this, ShowStudent.class);
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra("student", blank_student); //Optional parameters
+                startActivity(intent);
+            }
+        });
     }
 
     @Override
@@ -83,7 +84,15 @@ public class ShowRoster extends AppCompatActivity {
         if (sender != null && sender.equals("ShowStudent")) {
             System.out.println("Back from Students with student to save.");
             Student s = (Student) intent.getSerializableExtra("student");
-            roster.set(currentPosition,s);
+            if (currentPosition == -1) {
+                // back from new student
+                roster.add(s);
+            }
+            else {
+                roster.set(currentPosition, s);
+            }
+            roster.sortStudents();
+            adapter.notifyDataSetChanged();
             rosterChanged = true;
         }
     }

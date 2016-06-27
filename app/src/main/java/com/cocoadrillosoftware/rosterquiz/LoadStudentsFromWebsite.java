@@ -239,6 +239,8 @@ public class LoadStudentsFromWebsite extends AppCompatActivity {
                 adapter.notifyDataSetChanged();
                 if (count == images.size()-1) {
                     centerImage.setVisibility(View.INVISIBLE);
+                    roster.sortStudents();
+                    adapter.notifyDataSetChanged();
                     final Button saveButton = (Button) findViewById(R.id.addToRosterButton);
                     saveButton.setEnabled(true);
                 }

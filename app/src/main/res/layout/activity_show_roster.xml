@@ -33,7 +33,7 @@
             android:layout_width="fill_parent"
             android:layout_height="fill_parent">
             <ImageButton
-                android:id="@+id/allow"
+                android:id="@+id/runQuiz"
                 android:layout_width="0.0dip"
                 android:layout_height="fill_parent"
                 android:text="Allow"
@@ -41,7 +41,7 @@
                 android:src="@drawable/run_quiz"/>
 
             <ImageButton
-                android:id="@+id/deny"
+                android:id="@+id/newStudent"
                 android:layout_width="0.0dip"
                 android:layout_height="fill_parent"
                 android:text="Deny"
