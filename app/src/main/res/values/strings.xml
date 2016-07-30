@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">RosterQuiz</string>
     <string name="title_activity_show_student">ShowStudent</string>
+    <string name="title_activity_run_quiz">RunQuiz</string>
+    <string name="action_settings">Settings</string>
+    <string name="section_format">Hello World from section: %1$d</string>
 </resources>

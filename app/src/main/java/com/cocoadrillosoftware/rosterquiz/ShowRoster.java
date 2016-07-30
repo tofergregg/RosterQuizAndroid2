@@ -18,7 +18,6 @@ import java.io.ObjectInputStream;
 public class ShowRoster extends AppCompatActivity {
     Roster roster;
     RosterAdapter adapter;
-    final String rostersFolderName = "Rosters";
     int currentPosition;
     boolean rosterChanged = false;
 
@@ -30,7 +29,7 @@ public class ShowRoster extends AppCompatActivity {
 
         Intent i = getIntent();
         String rosterFilename = i.getStringExtra("rosterFilename");
-        // read roster from temp file
+        // read roster from storage
         roster = Roster.load(getApplicationContext(),rosterFilename);
         adapter = new RosterAdapter(this, roster);
         studentsTable.setAdapter(adapter);
@@ -65,6 +64,17 @@ public class ShowRoster extends AppCompatActivity {
                 Intent intent = new Intent(ShowRoster.this, ShowStudent.class);
                 intent.setAction(Intent.ACTION_SEND);
                 intent.putExtra("student", blank_student); //Optional parameters
+                startActivity(intent);
+            }
+        });
+
+        final ImageButton runQuizButton = (ImageButton) findViewById(R.id.runQuiz);
+        runQuizButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                Intent intent = new Intent(ShowRoster.this, RunQuiz.class);
+                // send
+                intent.setAction(Intent.ACTION_SEND);
+                intent.putExtra("rosterFilename", roster.toString()); //Optional parameters
                 startActivity(intent);
             }
         });
