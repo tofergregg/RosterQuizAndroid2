@@ -23,7 +23,11 @@
             android:windowSoftInputMode="adjustPan" />
         <activity android:name=".LoadStudentsFromWebsite" />
         <activity android:name=".ShowRoster" />
-        <activity android:name=".ShowStudent"></activity>
+        <activity android:name=".ShowStudent" />
+        <activity
+            android:name=".RunQuiz"
+            android:label="@string/title_activity_run_quiz"
+            android:theme="@style/AppTheme.NoActionBar"></activity>
     </application>
 
 </manifest>
