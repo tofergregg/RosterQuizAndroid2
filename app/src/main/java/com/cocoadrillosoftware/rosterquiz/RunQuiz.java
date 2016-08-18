@@ -1,6 +1,7 @@
 package com.cocoadrillosoftware.rosterquiz;
 
 import android.content.Intent;
+import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -144,6 +145,7 @@ public class RunQuiz extends AppCompatActivity {
         ImageView picture;
         Student actualChoice;
         ArrayList<Student> allChoices;
+        int correct,incorrect; // for quiz stats
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -203,6 +205,7 @@ public class RunQuiz extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         System.out.println("Clicked "+idNum);
+                        userMadeChoice(idNum);
                     }
                 });
                 linLayout.addView(tv);
@@ -210,6 +213,9 @@ public class RunQuiz extends AppCompatActivity {
             }
             multChoiceLayout.addView(linLayout);
             randGen = new Random(); // for randomizing the quiz
+            // set quiz stats to 0
+            correct = 0;
+            incorrect = 0;
             this.runMultipleChoiceQuiz();
 
         }
@@ -221,25 +227,63 @@ public class RunQuiz extends AppCompatActivity {
             for (int i=0;i<buttonCount;i++) {
                 // chose a student who hasn't already been chosen
                 // (including first name overlaps!)
-                boolean choiceOk = false;
+                // TODO: fix issue if there aren't enough names to go around
+                // (i.e., infinite loop)
+                boolean choiceOk;
                 Student s = null;
-                while (!choiceOk) {
+                do {
+                    choiceOk = true; // assume we're okay
                     int nextChoice = randGen.nextInt(roster.size());
                     s = roster.get(nextChoice);
                     for (int j = 0; j < i; j++) {
-                        if (allChoices.get(j).firstName == s.firstName) {
+                        if (allChoices.get(j).firstName.equalsIgnoreCase(s.firstName)) {
+                            choiceOk = false;
                             break; // not a good choice
                         }
                     }
-                    choiceOk = true;
-                }
+                }  while (!choiceOk);
                 allChoices.add(s);
-                buttonList.get(i).setText(s.firstName);
+                TextView button = buttonList.get(i);
+                button.setText(s.firstName);
+                // unset strikethrough in case we set it previously
+                button.setPaintFlags(button.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
             }
             // now, randomly chose among the list
             actualChoice = allChoices.get(randGen.nextInt(buttonCount));
             picture = (ImageView) getView().findViewById(R.id.studentQuizPic);
             picture.setImageDrawable(new BitmapDrawable(getResources(),actualChoice.picture.getBitmap()));
+        }
+        void userMadeChoice(int choice)
+        {
+            // check the choice
+            if (allChoices.get(choice) == actualChoice) {
+                System.out.println("Correct!");
+                correct++;
+                updateStats();
+                runMultipleChoiceQuiz();
+            }
+            else {
+                System.out.println("Incorrect!");
+                TextView button = buttonList.get(choice);
+                button.setPaintFlags(button.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                incorrect++;
+                updateStats();
+            }
+        }
+        void updateStats()
+        {
+            // update score
+            float percent;
+            int totalAnswered = correct + incorrect;
+            if (totalAnswered != 0) {
+                percent = Math.round(correct / (float) totalAnswered * 10000) / (float)100.0;
+                System.out.println("Score: " + percent);
+                // update text on screen
+                TextView scoreView = (TextView) getView().findViewById(R.id.scoreText);
+                scoreView.setText("Score: "+ Integer.toString(correct) + "/" +
+                        Integer.toString(totalAnswered) + " (" +
+                        Float.toString(percent) + "%)");
+            }
         }
     }
 }
