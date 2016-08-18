@@ -199,15 +199,6 @@ public class RunQuiz extends AppCompatActivity {
                 tv.setId(i);
                 tv.setTextSize(20);
                 tv.setPadding(0,20,0,0);
-                //tv.setText(roster.get(i).firstName);
-                final int idNum = i;
-                tv.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        System.out.println("Clicked "+idNum);
-                        userMadeChoice(idNum);
-                    }
-                });
                 linLayout.addView(tv);
                 buttonList.add(tv);
             }
@@ -247,6 +238,15 @@ public class RunQuiz extends AppCompatActivity {
                 button.setText(s.firstName);
                 // unset strikethrough in case we set it previously
                 button.setPaintFlags(button.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+                // set onClickListener so the user can click on the text
+                final int idNum = i;
+                button.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        System.out.println("Clicked "+idNum);
+                        userMadeChoice(idNum);
+                    }
+                });
             }
             // now, randomly chose among the list
             actualChoice = allChoices.get(randGen.nextInt(buttonCount));
@@ -266,6 +266,8 @@ public class RunQuiz extends AppCompatActivity {
                 System.out.println("Incorrect!");
                 TextView button = buttonList.get(choice);
                 button.setPaintFlags(button.getPaintFlags() | Paint.STRIKE_THRU_TEXT_FLAG);
+                // remove listener so the user can't chose it again
+                button.setOnClickListener(null);
                 incorrect++;
                 updateStats();
             }
