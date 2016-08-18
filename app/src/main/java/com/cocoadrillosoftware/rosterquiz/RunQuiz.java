@@ -26,6 +26,8 @@ import android.content.res.Resources.Theme;
 
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 public class RunQuiz extends AppCompatActivity {
     static Roster roster;
 
@@ -131,6 +133,10 @@ public class RunQuiz extends AppCompatActivity {
      * A placeholder fragment containing a simple view.
      */
     public static class PlaceholderFragment extends Fragment {
+        View currentView;
+        Context currentContext;
+        int buttonCount = 7; // initial count
+        ArrayList<TextView> buttonList;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -163,8 +169,8 @@ public class RunQuiz extends AppCompatActivity {
         @Override
         public void onActivityCreated(Bundle savedInstanceState) {
             super.onActivityCreated(savedInstanceState);
-            View currentView = getView();
-            Context currentContext = getContext();
+            currentView = getView();
+            currentContext = getContext();
             RelativeLayout multChoiceLayout = (RelativeLayout) currentView.findViewById(R.id.multChoiceRelativeLayout);
             RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT);
@@ -174,13 +180,16 @@ public class RunQuiz extends AppCompatActivity {
             LinearLayout linLayout = new LinearLayout(currentContext);
             linLayout.setOrientation(LinearLayout.VERTICAL);
             linLayout.setLayoutParams(rlp);
-
-            for (int i = 0; i < 7; i++) {
+            if (roster.size() < buttonCount) {
+                buttonCount = roster.size();
+            }
+            buttonList = new ArrayList<TextView>();
+            for (int i = 0; i < buttonCount ; i++) {
                 TextView tv = new TextView(currentContext);
                 tv.setId(i);
                 tv.setTextSize(20);
                 tv.setPadding(0,20,0,0);
-                tv.setText(roster.get(i).firstName);
+                //tv.setText(roster.get(i).firstName);
                 final int idNum = i;
                 tv.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -189,9 +198,18 @@ public class RunQuiz extends AppCompatActivity {
                     }
                 });
                 linLayout.addView(tv);
+                buttonList.add(tv);
             }
             multChoiceLayout.addView(linLayout);
 
+            this.runMultipleChoiceQuiz();
+
+        }
+        void runMultipleChoiceQuiz()
+        {
+            for (int i=0;i<buttonCount;i++) {
+                buttonList.get(i).setText(roster.get(i).firstName);
+            }
         }
     }
 }
