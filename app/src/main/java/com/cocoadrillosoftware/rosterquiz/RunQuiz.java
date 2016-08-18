@@ -1,6 +1,7 @@
 package com.cocoadrillosoftware.rosterquiz;
 
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
@@ -16,6 +17,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -27,6 +29,7 @@ import android.content.res.Resources.Theme;
 import android.widget.TextView;
 
 import java.util.ArrayList;
+import java.util.Random;
 
 public class RunQuiz extends AppCompatActivity {
     static Roster roster;
@@ -137,6 +140,10 @@ public class RunQuiz extends AppCompatActivity {
         Context currentContext;
         int buttonCount = 7; // initial count
         ArrayList<TextView> buttonList;
+        Random randGen;
+        ImageView picture;
+        Student actualChoice;
+        ArrayList<Student> allChoices;
         /**
          * The fragment argument representing the section number for this
          * fragment.
@@ -183,6 +190,7 @@ public class RunQuiz extends AppCompatActivity {
             if (roster.size() < buttonCount) {
                 buttonCount = roster.size();
             }
+
             buttonList = new ArrayList<TextView>();
             for (int i = 0; i < buttonCount ; i++) {
                 TextView tv = new TextView(currentContext);
@@ -201,15 +209,37 @@ public class RunQuiz extends AppCompatActivity {
                 buttonList.add(tv);
             }
             multChoiceLayout.addView(linLayout);
-
+            randGen = new Random(); // for randomizing the quiz
             this.runMultipleChoiceQuiz();
 
         }
         void runMultipleChoiceQuiz()
         {
+            // choose buttonCount students
+            allChoices = new ArrayList<Student>();
+
             for (int i=0;i<buttonCount;i++) {
-                buttonList.get(i).setText(roster.get(i).firstName);
+                // chose a student who hasn't already been chosen
+                // (including first name overlaps!)
+                boolean choiceOk = false;
+                Student s = null;
+                while (!choiceOk) {
+                    int nextChoice = randGen.nextInt(roster.size());
+                    s = roster.get(nextChoice);
+                    for (int j = 0; j < i; j++) {
+                        if (allChoices.get(j).firstName == s.firstName) {
+                            break; // not a good choice
+                        }
+                    }
+                    choiceOk = true;
+                }
+                allChoices.add(s);
+                buttonList.get(i).setText(s.firstName);
             }
+            // now, randomly chose among the list
+            actualChoice = allChoices.get(randGen.nextInt(buttonCount));
+            picture = (ImageView) getView().findViewById(R.id.studentQuizPic);
+            picture.setImageDrawable(new BitmapDrawable(getResources(),actualChoice.picture.getBitmap()));
         }
     }
 }
