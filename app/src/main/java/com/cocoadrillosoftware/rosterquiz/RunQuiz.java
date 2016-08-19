@@ -10,14 +10,19 @@ import android.support.v7.widget.Toolbar;
 
 import android.support.v4.app.Fragment;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -28,12 +33,14 @@ import android.support.v7.widget.ThemedSpinnerAdapter;
 import android.content.res.Resources.Theme;
 
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.Random;
 
 public class RunQuiz extends AppCompatActivity {
     static Roster roster;
+    static boolean multipleChoice = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,12 @@ public class RunQuiz extends AppCompatActivity {
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                         .commit();
+                if (position == 0) {
+                    multipleChoice = true;
+                }
+                else {
+                    multipleChoice = false;
+                }
             }
 
             @Override
@@ -145,6 +158,8 @@ public class RunQuiz extends AppCompatActivity {
         ImageView picture;
         Student actualChoice;
         ArrayList<Student> allChoices;
+        EditText freeResponseAnswer;
+        TextView continueText,hintText;
         int correct,incorrect; // for quiz stats
         /**
          * The fragment argument representing the section number for this
@@ -180,7 +195,7 @@ public class RunQuiz extends AppCompatActivity {
             super.onActivityCreated(savedInstanceState);
             currentView = getView();
             currentContext = getContext();
-            RelativeLayout multChoiceLayout = (RelativeLayout) currentView.findViewById(R.id.multChoiceRelativeLayout);
+            RelativeLayout quizLayout = (RelativeLayout) currentView.findViewById(R.id.multChoiceRelativeLayout);
             RelativeLayout.LayoutParams rlp = new RelativeLayout.LayoutParams(RelativeLayout.LayoutParams.WRAP_CONTENT,
                     RelativeLayout.LayoutParams.MATCH_PARENT);
             rlp.addRule(RelativeLayout.CENTER_HORIZONTAL);
@@ -192,23 +207,92 @@ public class RunQuiz extends AppCompatActivity {
             if (roster.size() < buttonCount) {
                 buttonCount = roster.size();
             }
-
-            buttonList = new ArrayList<TextView>();
-            for (int i = 0; i < buttonCount ; i++) {
-                TextView tv = new TextView(currentContext);
-                tv.setId(i);
-                tv.setTextSize(20);
-                tv.setPadding(0,20,0,0);
-                linLayout.addView(tv);
-                buttonList.add(tv);
-            }
-            multChoiceLayout.addView(linLayout);
             randGen = new Random(); // for randomizing the quiz
             // set quiz stats to 0
             correct = 0;
             incorrect = 0;
-            this.runMultipleChoiceQuiz();
 
+            if (multipleChoice) {
+                buttonList = new ArrayList<TextView>();
+                for (int i = 0; i < buttonCount ; i++) {
+                    TextView tv = new TextView(currentContext);
+                    tv.setId(i);
+                    tv.setTextSize(20);
+                    tv.setPadding(0,20,0,0);
+                    linLayout.addView(tv);
+                    buttonList.add(tv);
+                }
+                quizLayout.addView(linLayout);
+                this.runMultipleChoiceQuiz();
+            }
+            else {
+                TextView tv = new TextView(currentContext);
+                tv.setGravity(Gravity.CENTER);
+                tv.setTextSize(20);
+                tv.setPadding(0,10,0,0);
+                tv.setText("First Name Guess:");
+                linLayout.addView(tv);
+
+                // add the edit text box for the answer
+                final EditText answerBox = new EditText(currentContext);
+                freeResponseAnswer = answerBox;
+                answerBox.setGravity(Gravity.CENTER);
+                answerBox.setSingleLine();
+                answerBox.setImeOptions(EditorInfo.IME_ACTION_DONE);
+                answerBox.setOnKeyListener(new View.OnKeyListener() {
+                    public boolean onKey(View v, int keyCode, KeyEvent event) {
+                        // If the event is a key-down event on the "enter" button
+                        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+                                (keyCode == KeyEvent.KEYCODE_ENTER)) {
+                            // Perform action on key press
+                            checkAnswer();
+                            return true;
+                        }
+                        return false;
+                    }
+                });
+
+                // for onscreen keyboard
+                answerBox.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+                    @Override
+                    public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
+                        boolean handled = false;
+                        if (actionId == EditorInfo.IME_ACTION_DONE) {
+                            checkAnswer();
+                            handled = true;
+                        }
+                        return handled;
+                    }
+                });
+                linLayout.addView(answerBox);
+
+                // add text about a hint
+                hintText = new TextView(currentContext);
+                hintText.setGravity(Gravity.CENTER);
+                hintText.setTextSize(18);
+                hintText.setPadding(0,20,0,0);
+                hintText.setText("Click for next letter hint");
+                // clickListener to provide hint
+                hintText.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        provideHint();
+                    }
+                });
+                linLayout.addView(hintText);
+
+                // add text for continuing
+                continueText = new TextView(currentContext);
+                continueText.setGravity(Gravity.CENTER);
+                continueText.setTextSize(18);
+                continueText.setPadding(0,20,0,0);
+
+                // no actual text yet
+                linLayout.addView(continueText);
+
+                quizLayout.addView(linLayout);
+                this.runFreeResponseQuiz();
+            }
         }
         void runMultipleChoiceQuiz()
         {
@@ -253,6 +337,22 @@ public class RunQuiz extends AppCompatActivity {
             picture = (ImageView) getView().findViewById(R.id.studentQuizPic);
             picture.setImageDrawable(new BitmapDrawable(getResources(),actualChoice.picture.getBitmap()));
         }
+
+        void runFreeResponseQuiz() {
+            int nextChoice = randGen.nextInt(roster.size());
+            actualChoice = roster.get(nextChoice);
+            picture = (ImageView) getView().findViewById(R.id.studentQuizPic);
+            picture.setImageDrawable(new BitmapDrawable(getResources(),actualChoice.picture.getBitmap()));
+            // remove text from continue box, and remove the listener if present
+            continueText.setText("");
+            continueText.setOnClickListener(null);
+            // remove text from answer
+            freeResponseAnswer.setText("");
+            // set the hint text
+            hintText.setText("Click for next letter hint");
+            freeResponseAnswer.setEnabled(true);
+        }
+
         void userMadeChoice(int choice)
         {
             // check the choice
@@ -286,6 +386,37 @@ public class RunQuiz extends AppCompatActivity {
                         Integer.toString(totalAnswered) + " (" +
                         Float.toString(percent) + "%)");
             }
+        }
+        void provideHint()
+        {
+            System.out.println("Providing hint");
+
+        }
+        void checkAnswer()
+        {
+            String answer = freeResponseAnswer.getText().toString();
+            System.out.println("Checking answer: " + answer);
+            InputMethodManager inputManager = (InputMethodManager)getActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            inputManager.hideSoftInputFromWindow(getActivity().getCurrentFocus().getWindowToken(),
+                    InputMethodManager.HIDE_NOT_ALWAYS);
+            if (answer.equalsIgnoreCase(actualChoice.firstName)) {
+                correct++;
+                hintText.setText("Correct! " + actualChoice.commaName());
+            }
+            else {
+                incorrect++;
+                hintText.setText("Incorrect! " + actualChoice.commaName());
+            }
+            updateStats();
+            continueText.setText("Click to Continue");
+            // set up listener when continuing
+            freeResponseAnswer.setEnabled(false); // don't allow text input until continue is clicked
+            continueText.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    runFreeResponseQuiz();
+                }
+            });
         }
     }
 }
