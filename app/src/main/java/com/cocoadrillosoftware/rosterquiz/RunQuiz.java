@@ -342,6 +342,8 @@ public class RunQuiz extends AppCompatActivity {
             int nextChoice = randGen.nextInt(roster.size());
             actualChoice = roster.get(nextChoice);
             picture = (ImageView) getView().findViewById(R.id.studentQuizPic);
+            picture.getLayoutParams().height=290;
+            picture.getLayoutParams().width=290;
             picture.setImageDrawable(new BitmapDrawable(getResources(),actualChoice.picture.getBitmap()));
             // remove text from continue box, and remove the listener if present
             continueText.setText("");
@@ -387,10 +389,45 @@ public class RunQuiz extends AppCompatActivity {
                         Float.toString(percent) + "%)");
             }
         }
+        int firstDiff(String s1, String s2)
+        {
+            // returns -1 if the strings are the same
+            // returns the index of the first character if they are different
+            if (s1.length() > s2.length()) {
+                // reverse so s1 is shorter
+                String temp = s1;
+                s1 = s2;
+                s2 = temp;
+            }
+            int i;
+            for (i=0;i<s1.length();i++) {
+                if (s1.charAt(i) != s2.charAt(i)) {
+                    return i; // position of first difference
+                }
+            }
+            if (s1.length() < s2.length()) {
+                return i; // must differ in the rest of the string
+            }
+            return -1; // no difference
+        }
+
         void provideHint()
         {
             System.out.println("Providing hint");
-
+            String guess = freeResponseAnswer.getText().toString().toLowerCase();
+            String actual = actualChoice.firstName;
+            int diff = firstDiff(guess,actual.toLowerCase());
+            System.out.println("Diff: "+Integer.toString(diff));
+            // add a character after the first difference
+            if (diff >= 0 && diff < actual.length()) {
+                freeResponseAnswer.setText("");
+                freeResponseAnswer.append(actual.substring(0,diff+1));
+            }
+            if (diff == actual.length()-1) {
+                incorrect++;
+                hintText.setText(actualChoice.commaName());
+                waitForContinue();
+            }
         }
         void checkAnswer()
         {
@@ -407,6 +444,10 @@ public class RunQuiz extends AppCompatActivity {
                 incorrect++;
                 hintText.setText("Incorrect! " + actualChoice.commaName());
             }
+            waitForContinue();
+        }
+        void waitForContinue()
+        {
             updateStats();
             continueText.setText("Click to Continue");
             // set up listener when continuing
